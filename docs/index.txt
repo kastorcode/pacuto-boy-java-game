@@ -1,0 +1,6 @@
+Player (move em todas as direções).
+Sistema de vida.
+Efeitos sonoros.
+AStar nos inimigos.
+Modo fantasma nos inimigos.
+Coletar moedas para ganhar o jogo.

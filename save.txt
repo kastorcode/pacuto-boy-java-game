@@ -1,0 +1,3 @@
+foodCount =::
+foodCurrent <;?
+life ;

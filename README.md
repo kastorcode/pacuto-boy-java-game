@@ -1,4 +1,4 @@
-## Naruto Adventures
+## Pacuto-Boy
 
 > 👷 Developed by Matheus Ramalho de Oliveira.  
 🔨 Systems Analyst, Full-Stack Developer.  
@@ -9,7 +9,7 @@
 ---
 
 <p align="center">
-    Collect the kunais, defeat the enemies, score as much as you can. A 2D game made in Java.
+    Eating, eating, eating, is the best way to grow! Eat as many ramens as you can to score, but beware of ghosts, they want, and will, haunt you!
 </p>
 
 ---
@@ -28,23 +28,11 @@
     <img src="screenshots/3.png" width="720" />
 </p>
 
-<p align="center">
-    <img src="screenshots/4.png" width="720" />
-</p>
-
-<p align="center">
-    <img src="screenshots/5.png" width="720" />
-</p>
-
-<p align="center">
-    <img src="screenshots/6.png" width="720" />
-</p>
-
 ---
 
-### 🥷 Installation and execution
+### 🍜 Installation and execution
 
 1. Make a clone of this repository;
 2. Import the project into a `Java IDE`, such as [Eclipse](https://www.eclipse.org/ide) or [NetBeans](https://netbeans.apache.org);
 3. Press `Ctrl + F11` to start the game;
-4. Enjoy! 👍
+4. Enjoy! 👻

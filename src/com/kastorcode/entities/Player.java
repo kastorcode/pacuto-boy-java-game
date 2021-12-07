@@ -5,17 +5,22 @@ import java.awt.image.BufferedImage;
 
 import com.kastorcode.graphics.Spritesheet;
 import com.kastorcode.main.Game;
+import com.kastorcode.main.NewerSound;
 import com.kastorcode.world.Camera;
 import com.kastorcode.world.Tile;
 import com.kastorcode.world.World;
 
 
 public class Player extends Entity {
+	public static final NewerSound
+		DEATH_SOUND = new NewerSound("/effects/death.wav"),
+		FART_SOUND = new NewerSound("/effects/fart.wav");
+
 	public static BufferedImage leftSprite;
 
 	public boolean right, left, up, down;
 
-	public int z = 0, lastDirection = 1;
+	public int z = 0, lastDirection = 1, life = 2;
 
 
 	public Player(int x, int y, int width, int height, double speed, BufferedImage sprite) {
@@ -34,6 +39,11 @@ public class Player extends Entity {
 			) {
 				Game.entities.remove(i);
 				Game.foodCurrent++;
+
+				if (Game.foodCurrent % 10 == 0) {
+					FART_SOUND.play();
+				}
+
 				return;
 			}
 		}
@@ -41,6 +51,14 @@ public class Player extends Entity {
 
 
 	public void tick () {
+		if (life < 1) {
+			DEATH_SOUND.play();
+			Game.foodCurrent = 0;
+			Game.foodCount = 0;
+			Game.over("level1.png");
+			return;
+		}
+
 		depth = 1;
 
 		if (right && World.isFree((int)(x + speed), getY(), z)) {
@@ -59,12 +77,8 @@ public class Player extends Entity {
 			setY(y += speed);
 		}
 
+		updateCamera();
 		isCollidingWithFood();
-
-		if (Game.foodCurrent == Game.foodCount) {
-			Game.over("level1.png");
-			return;
-		}
 	}
 
 

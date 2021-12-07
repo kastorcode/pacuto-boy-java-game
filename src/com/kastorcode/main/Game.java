@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import com.kastorcode.entities.Entity;
 import com.kastorcode.entities.Player;
 import com.kastorcode.graphics.Spritesheet;
@@ -25,7 +27,15 @@ import com.kastorcode.world.World;
 public class Game extends Window implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 	private static final long serialVersionUID = 1L;
 
+	public static boolean
+		pause = true,
+		findingPath = false;
+
+	public static String saveOrLoad = null;
+
 	private Thread thread;
+
+	public static Thread findPathThread, bgSoundThread;
 
 	private boolean isRunning;
 
@@ -41,19 +51,20 @@ public class Game extends Window implements Runnable, KeyListener, MouseListener
 
 	public UI ui;
 
-	public static String state = "MENU";
+	public static String[] bgSounds = {
+		"/bg/anger.wav",
+		"/bg/heaven_shaking_event.wav",
+		"/bg/pacman_theme_metal.wav",
+		"/bg/pacman_theme_remix.wav"
+	};
 
-	public static String[] bgSounds = new String[4];
-
-	public static NewerSound bgSound;
-
-	public boolean saveGame = false;
+	public static NewerSound bgSound = null;
 
 	public int[] pixels;
 
 	public static int foodCurrent = 0, foodCount = 0;
-
-	public int sceneTime = 0, sceneMaxTime = 60 * 3;
+	
+	public static List<Runnable> findPathQueue = new ArrayList<Runnable>();
 
 
 	public Game () {
@@ -100,9 +111,118 @@ public class Game extends Window implements Runnable, KeyListener, MouseListener
 
 
 	public void tick () {
+		if (saveOrLoad != null) {
+			switch (saveOrLoad) {
+				case "load": {
+					String saver = Menu.loadGame(10);
+
+					if (saver.length() > 0) {
+						Menu.applySave(saver);
+					}
+					else {
+						pause = true;
+						JOptionPane.showMessageDialog(
+							frame,
+							"No saves found.",
+							"",
+							JOptionPane.PLAIN_MESSAGE
+						);
+					}
+
+					break;
+				}
+
+				case "save": {
+					if (foodCurrent > 0) {
+						String[] keys = {
+							"foodCount",
+							"foodCurrent",
+							"life"
+						};
+
+						int[] values = {
+							foodCount,
+							foodCurrent,
+							player.life
+						};
+
+						Menu.saveGame(keys, values, 10);
+					}
+					break;
+				}
+			}
+			saveOrLoad = null;
+		}
+
+		if (pause) {
+			if (bgSound != null && bgSound.isRunning()) {
+				bgSound.stop();
+			}
+			return;
+		}
+
+		if (foodCurrent == foodCount) {
+			over("level1.png");
+			return;
+		}
+
+		if (!findingPath && findPathQueue.size() > 0) {
+			findingPath = true;
+			
+			if (findPathThread != null) {
+				try {
+					findPathThread.join();
+				}
+				catch (InterruptedException error) {
+					error.printStackTrace();
+				}
+			}
+
+			findPathThread = new Thread(new Runnable() {
+				public void run () {
+					try {
+						Runnable findPath = findPathQueue.remove(0);
+						findPath.run();
+					}
+					catch (NullPointerException error) {
+						findPathQueue = new ArrayList<Runnable>();
+						findingPath = false;
+						error.printStackTrace();
+					}
+				}
+			});
+
+			findPathThread.start();
+		}
+
 		for (int i = 0; i < entities.size(); i++) {
 			Entity entity = entities.get(i);
 			entity.tick();
+		}
+
+		if (bgSoundThread == null || (bgSound != null && !bgSound.isRunning())) {
+			if (bgSound != null) {
+				bgSound.stop();
+			}
+
+			bgSound = null;
+
+			if (bgSoundThread != null) {
+				try {
+					bgSoundThread.join();
+				}
+				catch (InterruptedException error) {
+					error.printStackTrace();
+				}
+			}
+
+			bgSoundThread = new Thread(new Runnable() {
+				public void run () {
+					bgSound = new NewerSound(bgSounds[Entity.rand.nextInt(bgSounds.length)]);
+					bgSound.play();
+				}
+			});
+			bgSoundThread.start();
 		}
 	}
 
@@ -112,6 +232,16 @@ public class Game extends Window implements Runnable, KeyListener, MouseListener
 			bgSound.stop();
 		}
 
+		if (findPathThread != null) {
+			try {
+				findPathThread.join();
+			}
+			catch (InterruptedException error) {
+				error.printStackTrace();
+			}
+		}
+
+		findPathQueue = new ArrayList<Runnable>();
 		entities = new ArrayList<Entity>();
 		spritesheet = new Spritesheet("spritesheet.png");
 		player = new Player(0, 0, 16, 16, 2, Spritesheet.getSprite(32, 0, 16, 16));
@@ -146,6 +276,13 @@ public class Game extends Window implements Runnable, KeyListener, MouseListener
 		}
 
 		ui.render(g);
+
+		if (pause) {
+			g.setColor(new Color(113, 89, 193, 153));
+			g.fillRect(0, 0, WIDTH, HEIGHT);
+			g.drawImage(Spritesheet.kastorcode, (Window.WIDTH / 2) - (Spritesheet.kastorcode.getWidth() / 2), (Window.HEIGHT / 2) - (Spritesheet.kastorcode.getHeight() / 2), null);
+		}
+
 		g.dispose();
 		g = bs.getDrawGraphics();
 
@@ -203,6 +340,24 @@ public class Game extends Window implements Runnable, KeyListener, MouseListener
 			case KeyEvent.VK_LEFT:
 			case KeyEvent.VK_A: {
 				player.left = true;
+				break;
+			}
+
+			case KeyEvent.VK_ESCAPE:
+			case KeyEvent.VK_BACK_SPACE: {
+				pause = !pause;
+				break;
+			}
+
+			case KeyEvent.VK_F1:
+			case KeyEvent.VK_F12: {
+				saveOrLoad = "save";
+				break;
+			}
+
+			case KeyEvent.VK_F5:
+			case KeyEvent.VK_F8: {
+				saveOrLoad = "load";
 				break;
 			}
 

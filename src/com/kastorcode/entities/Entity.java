@@ -13,6 +13,7 @@ import com.kastorcode.world.Camera;
 import com.kastorcode.world.Node;
 import com.kastorcode.world.Tile;
 import com.kastorcode.world.Vector2i;
+import com.kastorcode.world.WallTile;
 import com.kastorcode.world.World;
 
 
@@ -33,6 +34,7 @@ public class Entity {
 	public Entity (double x, double y, int width, int height, double speed, BufferedImage sprite) {
 		this.x = x;
 		this.y = y;
+		this.z = 0;
 		this.width = width;
 		this.height = height;
 		this.speed = speed;
@@ -105,6 +107,17 @@ public class Entity {
 	}
 
 
+	public boolean isCollidingWithWall (int nextX, int nextY) {
+		try {
+			return World.tiles[(nextX / Tile.TILE_SIZE) + ((nextY / Tile.TILE_SIZE) * World.WIDTH)]
+				instanceof WallTile;
+		}
+		catch (ArrayIndexOutOfBoundsException error) {
+			return true;
+		}
+	}
+
+
 	public boolean pixelPerfectIsColliding (int x1, int y1, int x2, int y2, int[] pixels1, int[] pixels2, BufferedImage sprite1, BufferedImage sprite2) {
 		for (int xx1 = 0; xx1 < sprite1.getWidth(); xx1++) {
 			for (int yy1 = 0; yy1 < sprite1.getHeight(); yy1++) {
@@ -136,17 +149,17 @@ public class Entity {
 				//xprev = x;
 				//yprev = y;
 
-				if (x < target.x * 16 && !isColliding(getX() + 1, getY())) {
+				if (x < target.x * 16 && !isCollidingWithWall(getX() + Tile.TILE_SIZE, getY())) {
 					x += speed;
 				}
-				else if (x > target.x * 16 && !isColliding(getX() - 1, getY())) {
+				else if (x > target.x * 16 && !isCollidingWithWall(getX() - Tile.TILE_SIZE, getY())) {
 					x -= speed;
 				}
 
-				if (y < target.y * 16 && !isColliding(getX(), getY() + 1)) {
+				if (y < target.y * 16 && !isCollidingWithWall(getX(), getY() + Tile.TILE_SIZE)) {
 					y += speed;
 				}
-				else if (y > target.y * 16 && !isColliding(getX(), getY() - 1)) {
+				else if (y > target.y * 16 && !isCollidingWithWall(getX(), getY() - Tile.TILE_SIZE)) {
 					y -= speed;
 				}
 

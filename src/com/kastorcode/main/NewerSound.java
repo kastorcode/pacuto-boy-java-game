@@ -34,6 +34,7 @@ public class NewerSound {
 	public void play () {
 		if (clip == null) { return; }
 
+		clip.setFramePosition(0);
 		clip.start();
 	}
 
@@ -49,7 +50,7 @@ public class NewerSound {
 		if (clip == null) { return; }
 
 		clip.stop();
-		clip.setFramePosition(0);
+		clip.close();
 	}
 
 
@@ -57,5 +58,12 @@ public class NewerSound {
 		if (clip == null) { return; }
 
 		clip.loop(500);
+	}
+
+
+	public boolean isRunning () {
+		if (clip == null) { return true; }
+
+		return clip.isRunning();
 	}
 }

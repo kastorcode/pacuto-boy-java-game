@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.kastorcode.entities.Enemy;
+import com.kastorcode.entities.Entity;
 import com.kastorcode.entities.Food;
 import com.kastorcode.main.Game;
 import com.kastorcode.main.Window;
@@ -37,20 +38,20 @@ public class World {
 
 					switch (pixel) {
 						// Floor
-						case 0xff000000: {
+						case 0xff00ff00: {
 							lastTile = Tile.TILE_FLOOR;
 							tiles[xx + (yy * WIDTH)] = new Tile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, lastTile);
 							break;
 						}
 
 						// Wall
-						case 0xffffffff: {
+						case 0xffeca249: {
 							tiles[xx + (yy * WIDTH)] = new WallTile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, Tile.TILE_WALL);
 							break;
 						}
 
 						// Food
-						case 0xffffd800: {
+						case 0xffffff00: {
 							tiles[xx + (yy * WIDTH)] = new Tile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, lastTile);
 							Food food = new Food(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 0, Food.SPRITE);
 							Game.entities.add(food);
@@ -58,24 +59,16 @@ public class World {
 							break;
 						}
 
-						// Blue Enemy
-						case 0xff00ffff: {
+						// Enemy
+						case 0xff000000: {
 							tiles[xx + (yy * WIDTH)] = new Tile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, lastTile);
-							Enemy enemy = new Enemy(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 1, Enemy.SPRITE1);
-							Game.entities.add(enemy);
-							break;
-						}
-
-						// Orange Enemy
-						case 0xffff6a00: {
-							tiles[xx + (yy * WIDTH)] = new Tile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, lastTile);
-							Enemy enemy = new Enemy(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 1, Enemy.SPRITE2);
+							Enemy enemy = new Enemy(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, 1, Enemy.SPRITES[Entity.rand.nextInt(Enemy.SPRITES.length - 1) + 1]);
 							Game.entities.add(enemy);
 							break;
 						}
 
 						// Player
-						case 0xff0026ff: {
+						case 0xffffffff: {
 							tiles[xx + (yy * WIDTH)] = new Tile(xx * Tile.TILE_SIZE, yy * Tile.TILE_SIZE, lastTile);
 							Game.player.setX(xx * Tile.TILE_SIZE);
 							Game.player.setY(yy * Tile.TILE_SIZE);

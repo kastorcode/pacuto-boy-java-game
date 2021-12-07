@@ -1,6 +1,7 @@
 package com.kastorcode.main;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -11,12 +12,14 @@ import java.awt.Toolkit;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.UIManager;
 
 
 public class Window extends Canvas implements ActionListener {
@@ -24,13 +27,13 @@ public class Window extends Canvas implements ActionListener {
 
 	public boolean fullScreen = true;
 
-	public static final int WIDTH = 240, HEIGHT = 240, SCALE = 2;
+	public static final int WIDTH = 400, HEIGHT = 300, SCALE = 2;
 
 	public static JFrame frame;
 
 
 	public Window () {
-		frame = new JFrame("Naruto Adventures");
+		frame = new JFrame("Pacuto-Boy");
 		frame.add(this);
 		frame.setResizable(false);
 		createMenu();
@@ -49,40 +52,53 @@ public class Window extends Canvas implements ActionListener {
 		Image cursorImage = toolkit.getImage(getClass().getResource("/images/cursor.png"));
 		Cursor cursor = toolkit.createCustomCursor(cursorImage, new Point(0, 0), "img");
 
-		frame.setCursor(cursor);
 		frame.setIconImage(icon);
+		frame.setCursor(cursor);
 		frame.setAlwaysOnTop(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 
 	public void createMenu () {
+		UIManager.put("MenuBar.background", new Color(25, 20, 34));
+
+		UIManager.put("Menu.borderPainted", false);
+		UIManager.put("Menu.foreground", new Color(113, 89, 193));
+		UIManager.put("Menu.selectionBackground", new Color(113, 89, 193));
+		UIManager.put("Menu.selectionForeground", new Color(255, 255, 255));
+
+		UIManager.put("RadioButtonMenuItem.borderPainted", false);
+		UIManager.put("RadioButtonMenuItem.background", new Color(25, 20, 34));
+		UIManager.put("RadioButtonMenuItem.foreground", new Color(113, 89, 193));
+		UIManager.put("RadioButtonMenuItem.selectionBackground", new Color(113, 89, 193));
+		UIManager.put("RadioButtonMenuItem.selectionForeground", new Color(255, 255, 255));
+
+		UIManager.put("MenuItem.borderPainted", false);
+		UIManager.put("MenuItem.background", new Color(25, 20, 34));
+		UIManager.put("MenuItem.foreground", new Color(113, 89, 193));
+		UIManager.put("MenuItem.selectionBackground", new Color(113, 89, 193));
+		UIManager.put("MenuItem.selectionForeground", new Color(255, 255, 255));
+
 		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBorderPainted(false);
 		frame.setJMenuBar(menuBar);
 
 		JMenu optionsMenu = new JMenu("Options");
+		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(optionsMenu);
 
 		JRadioButtonMenuItem fullScreenRadio =
         	new JRadioButtonMenuItem("Full screen");
-        fullScreenRadio.addActionListener(this);
-        optionsMenu.add(fullScreenRadio);
-
-        JRadioButtonMenuItem miniMapRadio =
-            new JRadioButtonMenuItem("Show mini map");
-        miniMapRadio.addActionListener(this);
-        optionsMenu.add(miniMapRadio);
-
-		JMenu helpMenu = new JMenu("Help");
-		menuBar.add(helpMenu);
+		fullScreenRadio.addActionListener(this);
+		optionsMenu.add(fullScreenRadio);
 
 		JMenuItem helpAction = new JMenuItem("Help");
 		helpAction.addActionListener(this);
-		helpMenu.add(helpAction);
+		optionsMenu.add(helpAction);
 
 		JMenuItem aboutAction = new JMenuItem("About");
 		aboutAction.addActionListener(this);
-		helpMenu.add(aboutAction);
+		optionsMenu.add(aboutAction);
 	}
 
 
@@ -129,7 +145,7 @@ public class Window extends Canvas implements ActionListener {
 			case "Help": {
 				JOptionPane.showMessageDialog(
 					frame,
-					"RIGHT or D: move the character to the right.\nLEFT or A: move the character to the left.\nUP or W: move the character up.\nDOWN or S: move the character down.\nSPACE or X: makes the character shoot.\nZ or J: makes the character jump.\nENTER or SHIFT: choose an option from the menu.\nESC or BACK_SPACE: pause the game.\nF1 or F12: save the game.\nF or F11: enter or exit full screen.",
+					"RIGHT or D: move the character to the right.\nLEFT or A: move the character to the left.\nUP or W: move the character up.\nDOWN or S: move the character down.\nESC or BACK_SPACE: pause the game.\nF1 or F12: save the game.\nF5 or F8: load the game.\nF or F11: enter or exit full screen.",
 					"Help",
 					JOptionPane.PLAIN_MESSAGE
 				);

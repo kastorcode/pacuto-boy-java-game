@@ -1,12 +1,12 @@
 package com.kastorcode.entities;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
 import com.kastorcode.graphics.Spritesheet;
 import com.kastorcode.main.Game;
+import com.kastorcode.main.NewerSound;
 import com.kastorcode.world.AStar;
 import com.kastorcode.world.Camera;
 import com.kastorcode.world.Tile;
@@ -14,14 +14,23 @@ import com.kastorcode.world.Vector2i;
 
 
 public class Enemy extends Entity {
-	public static BufferedImage
-		SPRITE1 = Spritesheet.getSprite(Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
-		SPRITE2 = Spritesheet.getSprite(Tile.TILE_SIZE * 2, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
-		SPRITE_GHOST = Spritesheet.getSprite(Tile.TILE_SIZE * 3, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE);
+	public static final NewerSound DAMAGE_SOUND = new NewerSound("/effects/damage.wav");
 
-	public boolean ghostMode = false;
+	public static BufferedImage[] SPRITES = {
+		Spritesheet.getSprite(Tile.TILE_SIZE * 5, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
+		Spritesheet.getSprite(Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
+		Spritesheet.getSprite(Tile.TILE_SIZE * 2, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
+		Spritesheet.getSprite(Tile.TILE_SIZE * 3, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE),
+		Spritesheet.getSprite(Tile.TILE_SIZE * 4, Tile.TILE_SIZE, Tile.TILE_SIZE, Tile.TILE_SIZE)
+	};
 
-	public int ghostFrames = 0, nextTime = rand.nextInt(60 * 5 - 60 * 3) + 60 * 3;
+	public boolean
+		ghostMode = false,
+		findingPath = false;
+
+	public int
+		ghostFrames = 0,
+		nextTime = rand.nextInt(60 * 6 - 60 * 2) + 60 * 2;
 
 
 	public Enemy(double x, double y, int width, int height, double speed, BufferedImage sprite) {
@@ -33,23 +42,38 @@ public class Enemy extends Entity {
 		depth = 0;
 
 		if (ghostMode == false) {
-			if (path == null || path.size() == 0) {
-				Vector2i start = new Vector2i(((int)(x / Tile.TILE_SIZE)), ((int)(y / Tile.TILE_SIZE)));
-				Vector2i end = new Vector2i(((int)(Game.player.x / Tile.TILE_SIZE)), ((int)(Game.player.y / Tile.TILE_SIZE)));
-				path = AStar.findPath(Game.world, start, end);
+			if (isCollidingWithPlayer()) {
+				destroySelf();
+				Game.player.life--;
+
+				if (Game.player.life > 0) {
+					DAMAGE_SOUND.play();
+				}
 			}
-	
-			if (new Random().nextInt(100) < 80) {
+			else {
+				if (calculateDistance(getX(), getY(), Game.player.getX(), Game.player.getY())
+					< 600 &&
+					Game.findPathQueue.size() < 10 &&
+					!findingPath
+				) {
+					findingPath = true;
+					Game.findPathQueue.add(new Runnable() {
+						public void run() {
+							try {
+								Vector2i start = new Vector2i(((int)(x / Tile.TILE_SIZE)), ((int)(y / Tile.TILE_SIZE)));
+								Vector2i end = new Vector2i(((int)(Game.player.x / Tile.TILE_SIZE)), ((int)(Game.player.y / Tile.TILE_SIZE)));
+								path = AStar.findPath(Game.world, start, end);
+								findingPath = false;
+								Game.findingPath = false;
+							}
+							catch (NullPointerException error) {
+								findingPath = false;
+							}
+						}
+					});
+				}
+
 				followPath(path, speed);
-			}
-	
-			if (x % Tile.TILE_SIZE == 0 &&
-				y % Tile.TILE_SIZE == 0 &&
-				new Random().nextInt(100) < 10
-			) {
-				Vector2i start = new Vector2i(((int)(x / Tile.TILE_SIZE)), ((int)(y / Tile.TILE_SIZE)));
-				Vector2i end = new Vector2i(((int)(Game.player.x / Tile.TILE_SIZE)), ((int)(Game.player.y / Tile.TILE_SIZE)));
-				path = AStar.findPath(Game.world, start, end);
 			}
 		}
 
@@ -57,13 +81,14 @@ public class Enemy extends Entity {
 
 		if (ghostFrames == nextTime) {
 			ghostFrames = 0;
-			nextTime = rand.nextInt(60 * 5 - 60 * 3) + 60 * 3;
 
 			if (ghostMode == false) {
 				ghostMode = true;
+				nextTime = rand.nextInt(60 * 3 - 60) + 60;
 			}
 			else {
 				ghostMode = false;
+				nextTime = rand.nextInt(60 * 9 - 60 * 3) + 60 * 3;
 			}
 		}
 	}
@@ -91,7 +116,7 @@ public class Enemy extends Entity {
 
 	public void render (Graphics g) {
 		if (ghostMode) {
-			g.drawImage(SPRITE_GHOST, getX() - Camera.getX(), getY() - Camera.getY(), null);
+			g.drawImage(SPRITES[0], getX() - Camera.getX(), getY() - Camera.getY(), null);
 		}
 		else {
 			super.render(g);
